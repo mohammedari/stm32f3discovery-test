@@ -1,0 +1,11 @@
+set tdesc filename gdb/workaround.xml
+set remote hardware-breakpoint-limit 6
+set remote hardware-watchpoint-limit 4
+target remote localhost:3333
+monitor halt
+monitor poll
+
+monitor flash probe 0
+monitor reset halt
+monitor flash write_image erase ../test.elf
+monitor soft_reset_halt
