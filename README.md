@@ -26,6 +26,3 @@ ld/stm32f303vc.ld : linker script which is optimized for stm32f303 mpu
 
 openocd/openocd.sh : script which runs OpenOCD (needs root permission)
 openocd/stm32f3discovery.cfg : OpenOCD configuration file for STM32F3Discovery
-~
-~
-~
