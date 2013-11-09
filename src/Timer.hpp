@@ -1,24 +1,43 @@
 #pragma once
-
 #include <stdint.h>
+#include <boost/utility.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <vector>
 
-class Timer
+class Timer : private boost::noncopyable
 {
 public:
-  static void Init(); 
+  Timer();
+  ~Timer();
 
   static inline void Tick()
   {
-    if (count > 0)
-       --count;
+    for (std::vector<uint32_t*>::iterator it = _counts.begin();
+         it != _counts.end();
+         ++it)
+    {
+      if ((**it) > 0)
+         --(**it);
+    }
   }
 
-  static inline void WaitMs(uint32_t delay)
+  inline void WaitMs(uint32_t delay)
   {
-    count = delay;
-    while (count > 0);
+    _count = delay;
+    while (_count > 0);
+  }
+
+  inline void Count(uint32_t count)
+  {
+    _count = count;
+  }
+
+  inline uint32_t Count()
+  {
+    return _count;
   }
 
 private:
-  static uint32_t count;
+  uint32_t _count;
+  static std::vector<uint32_t*> _counts;
 };

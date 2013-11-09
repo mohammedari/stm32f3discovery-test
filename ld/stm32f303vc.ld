@@ -33,9 +33,6 @@ MEMORY
   CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 8K
 }
 
-/* Config Libraries */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
-
 ENTRY(resetHandler)
 
 SECTIONS

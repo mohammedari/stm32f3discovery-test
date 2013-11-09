@@ -32,23 +32,24 @@ INCLUDES   = -ILibraries/STM32F30x_StdPeriph_Driver/inc/ \
                -ILibraries/STM32F3_Discovery/ \
                -ILibraries/
 
-LIBS       = -lm -lc
+LIBS       = -lm -lstdc++_s
 
 ##########################################
 # Flag Settings 
 ##########################################
 MCU        = -mthumb -mcpu=cortex-m4
 FPU        = -mfpu=fpv4-sp-d16 -mfloat-abi=softfp
-DEFINES    = -DSTM32F3XX -DUSE_STDPERIPH_DRIVER
+DEFINES    = -DSTM32F3XX -DUSE_STDPERIPH_DRIVER \
+             -DSTDOUT_USART=1 -DSTDERR_USART=1 -DSTDIN_USART=1
 
 CFLAGS     = $(MCU) $(FPU) $(DEFINES) $(INCLUDES) \
                -g -Wall -O0 -ffunction-sections -fdata-sections
-ASFLAGS    = $(MCU) $(FPU) -g -Wa,--warn -x assembler-with-cpp
 LDFLAGS    = $(MCU) $(FPU) -g -gdwarf-2 \
                -Tld/stm32f303vc.ld \
                -Xlinker --gc-sections -Wl,-Map=$(PROJ_NAME).map \
                $(LIBS) -o \
-               $(PROJ_NAME).elf
+               $(PROJ_NAME).elf \
+               --specs=nano.specs
 
 ##########################################
 # Targets
