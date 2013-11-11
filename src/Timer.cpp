@@ -1,10 +1,25 @@
 #include "Timer.hpp"
 #include "stm32f30x.h"
+#include <algorithm>
 
-uint32_t Timer::count = 0;
+uint32_t Timer::_time;
 
-void Timer::Init()
+Timer::Timer()
+ : _count(0)
 {
-  SystemCoreClockUpdate();
-  SysTick_Config(SystemCoreClock / 1000);
+  static bool firstTime = true;
+  if (firstTime)
+  {
+    SystemCoreClockUpdate();
+    SysTick_Config(SystemCoreClock / 1000);
+
+    firstTime = false;
+  }
+
+  _counts().push_back(&_count);
+}
+
+Timer::~Timer()
+{
+  _counts().remove(&_count);
 }

@@ -1,46 +1,20 @@
 #include "stm32f30x.h"
 #include "stm32f3_discovery.h"
-#include "Timer.hpp"
+#include <string>
+#include <iostream>
+#include "Roulette.hpp"
+#include "Serial.hpp"
 
-int main()
+extern "C" int main()
 {
-  Timer::Init();
-  const int delay = 100;
+  std::string hoge("hoge");
+  std::cout << hoge << std::endl;
 
-  STM_EVAL_LEDInit(LED3);
-  STM_EVAL_LEDInit(LED4);
-  STM_EVAL_LEDInit(LED5);
-  STM_EVAL_LEDInit(LED6);
-  STM_EVAL_LEDInit(LED7);
-  STM_EVAL_LEDInit(LED8);
-  STM_EVAL_LEDInit(LED9);
-  STM_EVAL_LEDInit(LED10);
+  Roulette::Delay(100);
 
   while (true)
   {
-    STM_EVAL_LEDToggle(LED3);
-    Timer::WaitMs(delay);
-    
-    STM_EVAL_LEDToggle(LED5);
-    Timer::WaitMs(delay);
-
-    STM_EVAL_LEDToggle(LED7);
-    Timer::WaitMs(delay);
-    
-    STM_EVAL_LEDToggle(LED9);
-    Timer::WaitMs(delay);
-
-    STM_EVAL_LEDToggle(LED10);
-    Timer::WaitMs(delay);
-
-    STM_EVAL_LEDToggle(LED8);
-    Timer::WaitMs(delay);
-    
-    STM_EVAL_LEDToggle(LED6);
-    Timer::WaitMs(delay);
-   
-    STM_EVAL_LEDToggle(LED4);
-    Timer::WaitMs(delay);
+    Roulette::Update(); 
   }
 
   return 0;

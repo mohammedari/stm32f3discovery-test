@@ -18,12 +18,14 @@ USER_SRCS      = $(wildcard src/*.c)
 USER_SRCS_CXX  = $(wildcard src/*.cpp)
 STDPERIPH_SRCS = $(wildcard Libraries/STM32F30x_StdPeriph_Driver/src/*.c)
 STARTUP_SRC    = $(wildcard Libraries/CMSIS/Device/ST/STM32F30x/Source/*.c)
+STARTUP_SRC_S  = $(wildcard Libraries/CMSIS/Device/ST/STM32F30x/Source/*.s)
 BOARD_SRC      = $(wildcard Libraries/STM32F3_Discovery/*.c)
 
 OBJS       = $(USER_SRCS:.c=.o) \
                $(USER_SRCS_CXX:.cpp=.o) \
                $(STDPERIPH_SRCS:.c=.o) \
                $(STARTUP_SRC:.c=.o) \
+               $(STARTUP_SRC_S:.s=.o) \
                $(BOARD_SRC:.c=.o)
 
 INCLUDES   = -ILibraries/STM32F30x_StdPeriph_Driver/inc/ \
@@ -32,23 +34,25 @@ INCLUDES   = -ILibraries/STM32F30x_StdPeriph_Driver/inc/ \
                -ILibraries/STM32F3_Discovery/ \
                -ILibraries/
 
-LIBS       = -lm -lc
+LIBS       = -lm -lstdc++_s
 
 ##########################################
 # Flag Settings 
 ##########################################
 MCU        = -mthumb -mcpu=cortex-m4
 FPU        = -mfpu=fpv4-sp-d16 -mfloat-abi=softfp
-DEFINES    = -DSTM32F3XX -DUSE_STDPERIPH_DRIVER
+DEFINES    = -DSTM32F3XX -DUSE_STDPERIPH_DRIVER \
+             -DSTDOUT_USART=1 -DSTDERR_USART=1 -DSTDIN_USART=1
 
 CFLAGS     = $(MCU) $(FPU) $(DEFINES) $(INCLUDES) \
                -g -Wall -O0 -ffunction-sections -fdata-sections
 ASFLAGS    = $(MCU) $(FPU) -g -Wa,--warn -x assembler-with-cpp
 LDFLAGS    = $(MCU) $(FPU) -g -gdwarf-2 \
-               -Tld/stm32f303vc.ld \
+               -Tld/STM32F303VC_FLASH.ld \
                -Xlinker --gc-sections -Wl,-Map=$(PROJ_NAME).map \
                $(LIBS) -o \
-               $(PROJ_NAME).elf
+               $(PROJ_NAME).elf \
+               --specs=nano.specs
 
 ##########################################
 # Targets
