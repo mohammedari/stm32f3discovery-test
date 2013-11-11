@@ -6,6 +6,14 @@ boost::circular_buffer<uint8_t> Serial::_wbuf(Serial::_wbufsize);
 Serial::Initializer Serial::_initializer;
 Serial::Initializer::Initializer()
 {
+  //Interrupt Configuration
+  NVIC_InitTypeDef nvic;
+  nvic.NVIC_IRQChannel = USART1_IRQn;
+  nvic.NVIC_IRQChannelPreemptionPriority = 1;
+  nvic.NVIC_IRQChannelSubPriority = 0;
+  nvic.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&nvic);
+
   //Clock Configuration
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
@@ -37,4 +45,27 @@ Serial::Initializer::Initializer()
 
   //enable USART
   USART_Cmd(USART1, ENABLE);
+  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+}
+
+void Serial::InterruptHandler()
+{
+  //Receive
+  if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+  {
+    if (!_rbuf.full())
+      _rbuf.push_back(static_cast<uint8_t>(USART_ReceiveData(USART1)));
+  }
+
+  //Send
+  if (USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
+  {
+    if (!_wbuf.empty())
+    {
+      USART_SendData(USART1, _wbuf.front());
+      _wbuf.pop_front();
+    }
+    else
+      USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+  }
 }

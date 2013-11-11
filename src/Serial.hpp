@@ -15,14 +15,30 @@ public: //debug
 
 public:
   template<class InsertIterator>
-  uint32_t Read(InsertIterator it, uint32_t size = 0)
+  static uint32_t Read(InsertIterator iit, uint32_t size = _rbufsize)
   {
-    return 0;
+    USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+    uint32_t received = 0;
+    while (!_rbuf.empty() && received < size)
+    {
+      *iit = _rbuf.front();
+      _rbuf.pop_front();
+      ++iit;
+
+      ++received;
+    }
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+    return received;
   }
 
   template<class ConstIterator>
-  void Write(ConstIterator begin, ConstIterator end)
+  static void Write(ConstIterator begin, ConstIterator end)
   {
+    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+    for (ConstIterator it = begin; it != end; ++it)
+      _wbuf.push_back(*it);
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   }
 
   static void InterruptHandler();

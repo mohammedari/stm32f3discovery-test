@@ -1,4 +1,5 @@
 #include "Timer.hpp"
+#include "Serial.hpp"
 
 extern "C" {
 
@@ -41,6 +42,11 @@ void PendSV_Handler()
 void SysTick_Handler()
 {
   Timer::Tick();
+}
+
+void USART1_IRQHandler()
+{
+  Serial::InterruptHandler();
 }
 
 }

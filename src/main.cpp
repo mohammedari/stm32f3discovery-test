@@ -12,9 +12,12 @@ extern "C" int main()
 
   Roulette::Delay(100);
 
+  int i = 0; 
   while (true)
   {
-    Roulette::Update(); 
+    std::cin >> i;
+    Roulette::Update();
+    std::cout << i << std::endl;
   }
 
   return 0;
