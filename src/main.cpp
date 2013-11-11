@@ -3,12 +3,12 @@
 #include <string>
 #include <iostream>
 #include "Roulette.hpp"
+#include "Serial.hpp"
 
 extern "C" int main()
 {
-
   std::string hoge("hoge");
-//  std::cout << hoge << std::endl;
+  std::cout << hoge << std::endl;
 
   Roulette::Delay(100);
 
