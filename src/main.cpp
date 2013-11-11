@@ -6,6 +6,7 @@
 
 extern "C" int main()
 {
+
   std::string hoge("hoge");
 //  std::cout << hoge << std::endl;
 

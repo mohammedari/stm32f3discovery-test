@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vector>
+#include <list>
 
 class Timer : private boost::noncopyable
 {
@@ -12,7 +12,7 @@ public:
 
   static inline void Tick()
   {
-    for (std::vector<uint32_t*>::iterator it = _counts.begin();
+    for (std::list<uint32_t*>::iterator it = _counts.begin();
          it != _counts.end();
          ++it)
     {
@@ -39,5 +39,5 @@ public:
 
 private:
   uint32_t _count;
-  static std::vector<uint32_t*> _counts;
+  static std::list<uint32_t*> _counts;
 };

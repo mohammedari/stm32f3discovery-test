@@ -2,7 +2,7 @@
 #include "stm32f30x.h"
 #include <algorithm>
 
-std::vector<uint32_t*> Timer::_counts;
+std::list<uint32_t*> Timer::_counts __attribute__((init_priority(150)));
 
 Timer::Timer()
  : _count(0)
@@ -21,5 +21,5 @@ Timer::Timer()
 
 Timer::~Timer()
 {
-  _counts.erase(std::find(_counts.begin(), _counts.end(), &_count));
+  _counts.remove(&_count);
 }
