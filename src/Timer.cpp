@@ -2,6 +2,8 @@
 #include "stm32f30x.h"
 #include <algorithm>
 
+uint32_t Timer::_time;
+
 Timer::Timer()
  : _count(0)
 {
