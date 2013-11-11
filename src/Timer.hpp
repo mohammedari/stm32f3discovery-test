@@ -12,8 +12,8 @@ public:
 
   static inline void Tick()
   {
-    for (std::list<uint32_t*>::iterator it = _counts.begin();
-         it != _counts.end();
+    for (std::list<uint32_t*>::iterator it = _counts().begin();
+         it != _counts().end();
          ++it)
     {
       if ((**it) > 0)
@@ -39,5 +39,9 @@ public:
 
 private:
   uint32_t _count;
-  static std::list<uint32_t*> _counts;
+  static std::list<uint32_t*>& _counts()
+  {
+    static std::list<uint32_t*> counts;
+    return counts;
+  }
 };

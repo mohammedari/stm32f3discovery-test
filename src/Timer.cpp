@@ -2,8 +2,6 @@
 #include "stm32f30x.h"
 #include <algorithm>
 
-std::list<uint32_t*> Timer::_counts __attribute__((init_priority(150)));
-
 Timer::Timer()
  : _count(0)
 {
@@ -16,10 +14,10 @@ Timer::Timer()
     firstTime = false;
   }
 
-  _counts.push_back(&_count);
+  _counts().push_back(&_count);
 }
 
 Timer::~Timer()
 {
-  _counts.remove(&_count);
+  _counts().remove(&_count);
 }
