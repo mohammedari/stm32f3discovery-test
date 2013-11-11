@@ -21,6 +21,11 @@ public:
          --(**it);
     }
   }
+  
+  static inline uint32_t Now()
+  {
+    return _time;
+  }
 
   inline void WaitMs(uint32_t delay)
   {
@@ -36,11 +41,6 @@ public:
   inline uint32_t Count()
   {
     return _count;
-  }
-
-  inline uint32_t Now()
-  {
-    return _time;
   }
 
 private:
