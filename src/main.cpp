@@ -4,18 +4,16 @@
 #include <iostream>
 #include "Roulette.hpp"
 
-int main()
+extern "C" int main()
 {
   std::string hoge("hoge");
 //  std::cout << hoge << std::endl;
 
-  SystemInit();
-  Roulette& roulette = Roulette::GetInstance();
-  roulette.Delay(100);
+  Roulette::Delay(100);
 
   while (true)
   {
-    roulette.Update(); 
+    Roulette::Update(); 
   }
 
   return 0;
