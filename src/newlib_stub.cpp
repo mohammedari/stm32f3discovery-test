@@ -151,15 +151,9 @@ caddr_t _sbrk(int incr) {
 
 int _read(int file, char *ptr, int len) {
     int num = 0;
-    std::vector<uint8_t> buf(len);
     switch (file) {
     case STDIN_FILENO:
-        num = Serial::Read(buf.begin(), len);
-
-        for (std::vector<uint8_t>::iterator it = buf.begin(); 
-             it != buf.end();
-             ++it)
-            *ptr++ = static_cast<char>(*it);
+        num = Serial::Read(ptr, len);
         break;
     default:
         errno = EBADF;
@@ -212,25 +206,19 @@ int _wait(int *status) {
  Returns -1 on error or number of bytes sent
  */
 int _write(int file, char *ptr, int len) {
-    std::vector<uint8_t> buf(len);
+    int num = 0;
     switch (file) {
     case STDOUT_FILENO: /*stdout*/
-        for (int n = 0; n < len; n++) 
-            buf.push_back(*(ptr + n));
-
-        Serial::Write(buf.begin(), buf.end());
+        num = Serial::Write(ptr, len);
         break;
     case STDERR_FILENO: /* stderr */
-        for (int n = 0; n < len; n++) 
-            buf.push_back(*(ptr + n));
-
-        Serial::Write(buf.begin(), buf.end());
+        num = Serial::Write(ptr, len);
         break;
     default:
         errno = EBADF;
         return -1;
     }
-    return len;
+    return num;
 }
 
 } //extern "C"
