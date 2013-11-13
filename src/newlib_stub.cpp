@@ -1,27 +1,12 @@
-/*
- * newlib_stubs.c
- *
- *  Created on: 2 Nov 2010
- *      Author: nanoage.co.uk
- */
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/times.h>
 #include <sys/unistd.h>
-#include "stm32f30x_usart.h"
+#include "Serial.hpp"
+#include <stdint.h>
 
-
-#ifndef STDOUT_USART
-#define STDOUT_USART 2
-#endif
-
-#ifndef STDERR_USART
-#define STDERR_USART 2
-#endif
-
-#ifndef STDIN_USART
-#define STDIN_USART 2
-#endif
+extern "C"
+{
 
 #undef errno
 extern int errno;
@@ -115,7 +100,7 @@ int _kill(int pid, int sig) {
  Establish a new name for an existing file. Minimal implementation:
  */
 
-int _link(char *old, char *new) {
+int _link(char *old, char *newaddr) {
     errno = EMLINK;
     return -1;
 }
@@ -164,24 +149,13 @@ caddr_t _sbrk(int incr) {
 
 
 int _read(int file, char *ptr, int len) {
-    int n;
     int num = 0;
     switch (file) {
     case STDIN_FILENO:
-        for (n = 0; n < len; n++) {
-#if   STDIN_USART == 1
-            while ((USART1->ISR & USART_FLAG_RXNE) == (uint16_t)RESET) {}
-            char c = (char)(USART1->TDR & (uint16_t)0x01FF);
-#elif STDIN_USART == 2
-            while ((USART2->ISR & USART_FLAG_RXNE) == (uint16_t)RESET) {}
-            char c = (char)(USART2->TDR & (uint16_t) 0x01FF);
-#elif STDIN_USART == 3
-            while ((USART3->ISR & USART_FLAG_RXNE) == (uint16_t)RESET) {}
-            char c = (char)(USART3->TDR & (uint16_t)0x01FF);
-#endif
-            *ptr++ = c;
-            num++;
-        }
+        num = Serial::Read(ptr, len);
+
+        if (num < len)
+          errno = EAGAIN;
         break;
     default:
         errno = EBADF;
@@ -234,41 +208,19 @@ int _wait(int *status) {
  Returns -1 on error or number of bytes sent
  */
 int _write(int file, char *ptr, int len) {
-    int n;
+    int num = 0;
     switch (file) {
     case STDOUT_FILENO: /*stdout*/
-        for (n = 0; n < len; n++) {
-#if STDOUT_USART == 1
-            while ((USART1->ISR & USART_FLAG_TC) == (uint16_t)RESET) {}
-            USART1->TDR = (*ptr++ & (uint16_t)0x01FF);
-#elif  STDOUT_USART == 2
-            while ((USART2->ISR & USART_FLAG_TC) == (uint16_t)RESET) {
-            }
-            USART2->TDR = (*ptr++ & (uint16_t)0x01FF);
-#elif  STDOUT_USART == 3
-            while ((USART3->ISR & USART_FLAG_TC) == (uint16_t)RESET) {}
-            USART3->TDR = (*ptr++ & (uint16_t)0x01FF);
-#endif
-        }
+        num = Serial::Write(ptr, len);
         break;
     case STDERR_FILENO: /* stderr */
-        for (n = 0; n < len; n++) {
-#if STDERR_USART == 1
-            while ((USART1->ISR & USART_FLAG_TC) == (uint16_t)RESET) {}
-            USART1->TDR = (*ptr++ & (uint16_t)0x01FF);
-#elif  STDERR_USART == 2
-            while ((USART2->ISR & USART_FLAG_TC) == (uint16_t)RESET) {
-            }
-            USART2->TDR = (*ptr++ & (uint16_t)0x01FF);
-#elif  STDERR_USART == 3
-            while ((USART3->ISR & USART_FLAG_TC) == (uint16_t)RESET) {}
-            USART3->TDR = (*ptr++ & (uint16_t)0x01FF);
-#endif
-        }
+        num = Serial::Write(ptr, len);
         break;
     default:
         errno = EBADF;
         return -1;
     }
-    return len;
+    return num;
 }
+
+} //extern "C"

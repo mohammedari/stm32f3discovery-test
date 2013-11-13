@@ -1,11 +1,19 @@
 #include "Serial.hpp"
 
-boost::circular_buffer<uint8_t> Serial::_rbuf(Serial::_rbufsize);
-boost::circular_buffer<uint8_t> Serial::_wbuf(Serial::_wbufsize);
+boost::circular_buffer<char> Serial::_rbuf(Serial::_rbufsize);
+boost::circular_buffer<char> Serial::_wbuf(Serial::_wbufsize);
 
 Serial::Initializer Serial::_initializer;
 Serial::Initializer::Initializer()
 {
+  //Interrupt Configuration
+  NVIC_InitTypeDef nvic;
+  nvic.NVIC_IRQChannel = USART1_IRQn;
+  nvic.NVIC_IRQChannelPreemptionPriority = 1;
+  nvic.NVIC_IRQChannelSubPriority = 0;
+  nvic.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&nvic);
+
   //Clock Configuration
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
@@ -36,5 +44,78 @@ Serial::Initializer::Initializer()
   USART_Init(USART1, &usart);
 
   //enable USART
+  USART_ITConfig(USART1, USART_IT_PE,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_TXE,  DISABLE); 
+  USART_ITConfig(USART1, USART_IT_TC,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+  USART_ITConfig(USART1, USART_IT_IDLE, DISABLE); 
+  USART_ITConfig(USART1, USART_IT_LBD,  DISABLE); 
+  USART_ITConfig(USART1, USART_IT_CTS,  DISABLE); 
+  USART_ITConfig(USART1, USART_IT_ERR,  DISABLE); 
   USART_Cmd(USART1, ENABLE);
+}
+
+size_t Serial::Read(char* ptr, size_t len)
+{
+  USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+  size_t received = 0;
+  while (!_rbuf.empty() && received < len)
+  {
+    *ptr++ = _rbuf.front();
+    _rbuf.pop_front();
+
+    ++received;
+  }
+  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+  return received;
+} 
+
+size_t Serial::Write(char* ptr, size_t len)
+{
+  USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+  size_t sent = 0;
+  while (sent < len)
+  {
+    _wbuf.push_back(*ptr++);
+    ++sent;
+  }
+  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+
+  return sent;
+}
+
+void Serial::InterruptHandler()
+{
+  //Receive
+  if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+  {
+    _rbuf.push_back(static_cast<char>(USART_ReceiveData(USART1)));
+  }
+
+  //Send
+  if (USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
+  {
+    if (!_wbuf.empty())
+    {
+      USART_GetFlagStatus(USART1, USART_FLAG_TC);
+      USART_SendData(USART1, _wbuf.front());
+      _wbuf.pop_front();
+    }
+    else
+      USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+  }
+
+  //clear error flags
+  if (USART_GetITStatus(USART1, USART_IT_ORE) != RESET || 
+      USART_GetITStatus(USART1, USART_IT_NE) != RESET || 
+      USART_GetITStatus(USART1, USART_IT_PE) != RESET || 
+      USART_GetITStatus(USART1, USART_IT_FE) != RESET)
+  {
+    USART_GetFlagStatus(USART1, USART_FLAG_ORE);
+    USART_GetFlagStatus(USART1, USART_FLAG_NE);
+    USART_GetFlagStatus(USART1, USART_FLAG_FE);
+    USART_GetFlagStatus(USART1, USART_FLAG_PE);
+    USART_ReceiveData(USART1);
+  }
 }
