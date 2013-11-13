@@ -3,7 +3,6 @@
 #include <sys/times.h>
 #include <sys/unistd.h>
 #include "Serial.hpp"
-#include <vector>
 #include <stdint.h>
 
 extern "C"
@@ -154,6 +153,9 @@ int _read(int file, char *ptr, int len) {
     switch (file) {
     case STDIN_FILENO:
         num = Serial::Read(ptr, len);
+
+        if (num < len)
+          errno = EAGAIN;
         break;
     default:
         errno = EBADF;
