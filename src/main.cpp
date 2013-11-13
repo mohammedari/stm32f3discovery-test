@@ -5,22 +5,29 @@
 #include "Roulette.hpp"
 #include "Serial.hpp"
 #include "Timer.hpp"
+#include <unistd.h>
+#include <boost/array.hpp>
 
 extern "C" int main()
 {
-  std::string hoge("hoge");
+  std::string hoge("Hello World!");
   std::cout << hoge << std::endl;
 
   Roulette::Delay(100);
   Timer timer;
 
+  boost::array<char, 256> buf;
   while (true)
   {
-    //std::cin >> i;
-    Roulette::Update();
-    std::cout << "barfoo" << 100 << std::endl;
+    size_t n = read(STDIN_FILENO, buf.data(), buf.size() - 1);
+    if (n > 0)
+    {
+      buf[n] = '\0';
+      write(STDOUT_FILENO, buf.data(), n);
+    }
 
-    timer.WaitMs(1);
+    Roulette::Update();
+    timer.WaitMs(1000);
   }
 
   return 0;
