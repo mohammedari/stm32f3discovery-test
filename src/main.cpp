@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Roulette.hpp"
 #include "Serial.hpp"
+#include "Timer.hpp"
 
 extern "C" int main()
 {
@@ -11,13 +12,15 @@ extern "C" int main()
   std::cout << hoge << std::endl;
 
   Roulette::Delay(100);
+  Timer timer;
 
-  int i = 0; 
   while (true)
   {
-    std::cin >> i;
+    //std::cin >> i;
     Roulette::Update();
-    std::cout << i << std::endl;
+    std::cout << "barfoo" << 100 << std::endl;
+
+    timer.WaitMs(1);
   }
 
   return 0;

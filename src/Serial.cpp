@@ -44,8 +44,17 @@ Serial::Initializer::Initializer()
   USART_Init(USART1, &usart);
 
   //enable USART
-  USART_Cmd(USART1, ENABLE);
+  USART_ITConfig(USART1, USART_IT_TXE,  DISABLE); 
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+  USART_ITConfig(USART1, USART_IT_TC,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_IDLE, DISABLE); 
+  USART_ITConfig(USART1, USART_IT_CTS,  DISABLE); 
+  USART_ITConfig(USART1, USART_IT_LBD,  DISABLE); 
+  USART_ITConfig(USART1, USART_IT_NE,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_FE,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_PE,   DISABLE); 
+  USART_ITConfig(USART1, USART_IT_ORE,  DISABLE); 
+  USART_Cmd(USART1, ENABLE);
 }
 
 void Serial::InterruptHandler()
@@ -53,8 +62,7 @@ void Serial::InterruptHandler()
   //Receive
   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
-    if (!_rbuf.full())
-      _rbuf.push_back(static_cast<uint8_t>(USART_ReceiveData(USART1)));
+    _rbuf.push_back(static_cast<uint8_t>(USART_ReceiveData(USART1)));
   }
 
   //Send
