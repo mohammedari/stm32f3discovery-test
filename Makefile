@@ -55,6 +55,15 @@ LDFLAGS    = $(MCU) $(FPU) -g -gdwarf-2 \
                --specs=nano.specs
 
 ##########################################
+# Flash Settings
+##########################################
+FLASH = $(FLASH_SPAWN) $(FLASH_HALT) $(FLASH_WRITE) $(FLASH_EXIT)
+FLASH_SPAWN = spawn telnet localhost 4444;
+FLASH_HALT  = expect \"> \"; send \"reset halt\n\";
+FLASH_WRITE = expect \"> \"; send \"flash write_image erase ../$(PROJ_NAME).elf\n\";
+FLASH_EXIT  = expect \"> \"; send \"exit\n\"; interact
+
+##########################################
 # Targets
 ##########################################
 all: $(PROJ_NAME).bin info
@@ -87,8 +96,14 @@ clean:
 	rm -f $(PROJ_NAME).elf
 	rm -f $(PROJ_NAME).bin
 	rm -f $(PROJ_NAME).map
+	rm -f .flash
 
-debug:
-	$(DBG) -x gdb/stm32f3vcdiscovery.script \
+debug: .flash
+	$(DBG) -x gdb/gdb.script \
           -s $(PROJ_NAME).elf \
           -interpreter=mi2
+
+flash: .flash
+.flash: $(PROJ_NAME).elf
+	expect -c "$(FLASH)" 
+	touch .flash

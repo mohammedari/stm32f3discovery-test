@@ -44,14 +44,7 @@ Serial::Initializer::Initializer()
   USART_Init(USART1, &usart);
 
   //enable USART
-  USART_ITConfig(USART1, USART_IT_PE,   DISABLE); 
-  USART_ITConfig(USART1, USART_IT_TXE,  DISABLE); 
-  USART_ITConfig(USART1, USART_IT_TC,   DISABLE); 
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-  USART_ITConfig(USART1, USART_IT_IDLE, DISABLE); 
-  USART_ITConfig(USART1, USART_IT_LBD,  DISABLE); 
-  USART_ITConfig(USART1, USART_IT_CTS,  DISABLE); 
-  USART_ITConfig(USART1, USART_IT_ERR,  DISABLE); 
   USART_Cmd(USART1, ENABLE);
 }
 
@@ -91,6 +84,7 @@ void Serial::InterruptHandler()
   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
     _rbuf.push_back(static_cast<char>(USART_ReceiveData(USART1)));
+    return;
   }
 
   //Send
@@ -98,24 +92,18 @@ void Serial::InterruptHandler()
   {
     if (!_wbuf.empty())
     {
-      USART_GetFlagStatus(USART1, USART_FLAG_TC);
       USART_SendData(USART1, _wbuf.front());
       _wbuf.pop_front();
     }
     else
       USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+
+    return;
   }
 
-  //clear error flags
-  if (USART_GetITStatus(USART1, USART_IT_ORE) != RESET || 
-      USART_GetITStatus(USART1, USART_IT_NE) != RESET || 
-      USART_GetITStatus(USART1, USART_IT_PE) != RESET || 
-      USART_GetITStatus(USART1, USART_IT_FE) != RESET)
-  {
-    USART_GetFlagStatus(USART1, USART_FLAG_ORE);
-    USART_GetFlagStatus(USART1, USART_FLAG_NE);
-    USART_GetFlagStatus(USART1, USART_FLAG_FE);
-    USART_GetFlagStatus(USART1, USART_FLAG_PE);
-    USART_ReceiveData(USART1);
-  }
+  //Interrupts which is not permitted raised!
+  //This happens when so many packetes are received.
+  //Something is wrong... reset USART module.
+  USART_Cmd(USART1, DISABLE);
+  USART_Cmd(USART1, ENABLE);
 }
