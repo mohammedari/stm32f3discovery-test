@@ -4,6 +4,11 @@ stm32f3discovery-test
 A test makefile project of stm32f3discovery. 
 This project contains LED flashing sample code, serial communication sample code, makefile, linker script, gdb script and openocd script.
 
+This project is written in C++ language and tested with "GNU Tools for ARM Embedded Processors" toolchain.
+Included source codes have dependencies on libstdc++_s and boost library.
+
+More simple version project (written in C language) is now available at [here]( https://github.com/mohammedari/stm32f3discovery-test-c)
+
 Build and Debug Steps
 ------
 
@@ -26,9 +31,9 @@ make debug
 Additional  Informations
 ------
 
-gdb/stm32f3vcdiscovery.script : gdb debugger script which includes flashing commands
+gdb/gdb.script : gdb debugger script which includes flashing commands
 
-ld/stm32f303vc.ld : linker script which is optimized for stm32f303 mpu
+ld/STM32F303VC_FLASH.ld : linker script which is optimized for stm32f303 mpu
 
 openocd/openocd.sh : script which runs OpenOCD (needs root permission)
 openocd/stm32f3discovery.cfg : OpenOCD configuration file for STM32F3Discovery
